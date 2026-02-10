@@ -14,6 +14,7 @@ import {
     Menu,
     X,
     Shield,
+    Settings,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -25,6 +26,7 @@ const navItems = {
         { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { href: '/dashboard/submissions', label: 'My Submissions', icon: Send },
         { href: '/dashboard/wallet', label: 'Wallet', icon: Wallet },
+        { href: '/dashboard/settings', label: 'Settings', icon: Settings },
     ],
     admin: [
         { href: '/admin', label: 'Overview', icon: LayoutDashboard },

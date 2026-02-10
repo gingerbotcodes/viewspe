@@ -37,17 +37,39 @@ export async function middleware(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser();
 
-    // Protect dashboard and admin routes
-    const protectedPaths = ['/dashboard', '/admin', '/advertiser'];
-    const isProtectedRoute = protectedPaths.some(path =>
+    // Protect dashboard and advertiser routes — must be logged in
+    const authProtectedPaths = ['/dashboard', '/advertiser'];
+    const isAuthProtected = authProtectedPaths.some(path =>
         request.nextUrl.pathname.startsWith(path)
     );
 
-    if (isProtectedRoute && !user) {
+    if (isAuthProtected && !user) {
         const url = request.nextUrl.clone();
         url.pathname = '/auth/login';
         url.searchParams.set('redirect', request.nextUrl.pathname);
         return NextResponse.redirect(url);
+    }
+
+    // Protect admin routes — must be logged in AND have admin role
+    if (request.nextUrl.pathname.startsWith('/admin')) {
+        if (!user) {
+            const url = request.nextUrl.clone();
+            url.pathname = '/';
+            return NextResponse.redirect(url);
+        }
+
+        // Check if user has admin role
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+        if (!profile || profile.role !== 'admin') {
+            const url = request.nextUrl.clone();
+            url.pathname = '/';
+            return NextResponse.redirect(url);
+        }
     }
 
     // Redirect logged-in users away from auth pages
