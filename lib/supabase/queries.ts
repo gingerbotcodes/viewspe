@@ -122,10 +122,22 @@ export async function getCreatorStats(creatorId: string) {
     };
 }
 
+import { createClient } from '@/lib/supabase/server';
+
 export async function getAdminStats() {
+    const supabase = await createClient();
+
+    // Get pending vetting count
+    const { count: pendingVetting } = await supabase
+        .from('creators')
+        .select('*', { count: 'exact', head: true })
+        .eq('vetting_status', 'pending');
+
     const allSubmissions = await getAllSubmissions();
+
     return {
         pendingApprovals: allSubmissions.filter(s => s.status === 'pending').length,
+        pendingVetting: pendingVetting || 0,
         totalCampaigns: MOCK_CAMPAIGNS.length,
         activeCampaigns: MOCK_CAMPAIGNS.filter(c => c.status === 'active').length,
         totalSubmissions: allSubmissions.length,

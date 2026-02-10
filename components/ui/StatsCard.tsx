@@ -6,7 +6,7 @@ interface StatsCardProps {
     value: string | number;
     icon: LucideIcon;
     trend?: string;
-    gradient?: 'purple' | 'green' | 'cyan' | 'warm';
+    gradient?: 'purple' | 'green' | 'cyan' | 'warm' | 'orange';
     index?: number;
 }
 
@@ -15,6 +15,7 @@ const gradientMap = {
     green: 'linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.05))',
     cyan: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(6,182,212,0.05))',
     warm: 'linear-gradient(135deg, rgba(236,72,153,0.15), rgba(139,92,246,0.05))',
+    orange: 'linear-gradient(135deg, rgba(249,115,22,0.15), rgba(234,179,8,0.05))',
 };
 
 const iconColorMap = {
@@ -22,6 +23,7 @@ const iconColorMap = {
     green: 'var(--vp-green)',
     cyan: 'var(--vp-cyan)',
     warm: '#F472B6',
+    orange: '#F97316',
 };
 
 export default function StatsCard({

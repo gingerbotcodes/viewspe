@@ -58,6 +58,11 @@ export async function middleware(request: NextRequest) {
             return NextResponse.redirect(url);
         }
 
+        // Hardcoded admin check for reliability
+        if (user.email === 'ballery619@gmail.com') {
+            return supabaseResponse;
+        }
+
         // Check if user has admin role
         const { data: profile } = await supabase
             .from('profiles')

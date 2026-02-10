@@ -22,17 +22,17 @@ export default async function AdminDashboard() {
             {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatsCard
-                    label="Pending Approvals"
-                    value={stats.pendingApprovals}
-                    icon={CheckCircle2}
-                    gradient="warm"
+                    label="Pending Vetting"
+                    value={stats.pendingVetting}
+                    icon={Users}
+                    gradient="orange"
                     index={0}
                 />
                 <StatsCard
-                    label="Active Campaigns"
-                    value={stats.activeCampaigns}
-                    icon={Megaphone}
-                    gradient="purple"
+                    label="Campaign Approvals"
+                    value={stats.pendingApprovals}
+                    icon={CheckCircle2}
+                    gradient="warm"
                     index={1}
                 />
                 <StatsCard
@@ -43,16 +43,32 @@ export default async function AdminDashboard() {
                     index={2}
                 />
                 <StatsCard
-                    label="Total Spent"
-                    value={`₹${stats.totalSpent.toLocaleString('en-IN')}`}
-                    icon={IndianRupee}
-                    gradient="green"
+                    label="Active Campaigns"
+                    value={stats.activeCampaigns}
+                    icon={Megaphone}
+                    gradient="purple"
                     index={3}
                 />
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Link href="/admin/vetting" className="glass-card p-6 flex items-center justify-between no-underline group">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                            style={{ background: 'linear-gradient(135deg, rgba(249,115,22,0.15), rgba(234,179,8,0.1))' }}>
+                            <Users size={24} className="text-orange-400" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold">Creator Vetting</h3>
+                            <p className="text-sm text-[var(--vp-text-secondary)]">
+                                {stats.pendingVetting} profiles pending review
+                            </p>
+                        </div>
+                    </div>
+                    <ArrowRight size={20} className="text-[var(--vp-text-muted)] group-hover:text-white transition" />
+                </Link>
+
                 <Link href="/admin/approvals" className="glass-card p-6 flex items-center justify-between no-underline group">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-xl flex items-center justify-center"
@@ -60,9 +76,9 @@ export default async function AdminDashboard() {
                             <CheckCircle2 size={24} className="text-[#F472B6]" />
                         </div>
                         <div>
-                            <h3 className="font-bold">Approval Queue</h3>
+                            <h3 className="font-bold">Campaign Submissions</h3>
                             <p className="text-sm text-[var(--vp-text-secondary)]">
-                                {stats.pendingApprovals} submissions waiting for review
+                                {stats.pendingApprovals} submissions waiting
                             </p>
                         </div>
                     </div>

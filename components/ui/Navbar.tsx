@@ -84,14 +84,19 @@ export default function Navbar({ minimal = false }: { minimal?: boolean }) {
                     {/* Desktop Nav — only show relevant link based on role */}
                     {!minimal && (
                         <div className="hidden md:flex items-center gap-6">
-                            {(!user || user.role === 'creator') && (
+                            {(!user || user.role === 'creator') && user?.role !== 'admin' && (
                                 <Link href="/dashboard" className="text-sm text-[var(--vp-text-secondary)] hover:text-white transition no-underline">
                                     Creator Hub
                                 </Link>
                             )}
-                            {(!user || user.role === 'advertiser') && (
+                            {(!user || user.role === 'advertiser') && user?.role !== 'admin' && (
                                 <Link href="/advertiser" className="text-sm text-[var(--vp-text-secondary)] hover:text-white transition no-underline">
                                     Advertiser
+                                </Link>
+                            )}
+                            {user?.role === 'admin' && (
+                                <Link href="/admin" className="text-sm text-[var(--vp-text-secondary)] hover:text-white transition no-underline font-medium text-amber-400">
+                                    Admin Dashboard
                                 </Link>
                             )}
                         </div>
@@ -99,7 +104,7 @@ export default function Navbar({ minimal = false }: { minimal?: boolean }) {
 
                     {/* Right side */}
                     <div className="hidden md:flex items-center gap-3">
-                        {minimal ? (
+                        {minimal && !user ? (
                             <Link href="/auth/login" className="btn-primary text-sm no-underline">
                                 Login
                             </Link>
@@ -164,7 +169,7 @@ export default function Navbar({ minimal = false }: { minimal?: boolean }) {
                     </div>
 
                     {/* Mobile hamburger */}
-                    {minimal ? (
+                    {minimal && !user ? (
                         <Link href="/auth/login" className="md:hidden btn-primary text-sm no-underline">
                             Login
                         </Link>
@@ -181,14 +186,19 @@ export default function Navbar({ minimal = false }: { minimal?: boolean }) {
                 <div className="md:hidden border-t border-[rgba(139,92,246,0.12)] animate-fade-in"
                     style={{ background: 'rgba(10, 10, 15, 0.95)' }}>
                     <div className="p-4 flex flex-col gap-1">
-                        {(!user || user.role === 'creator') && (
+                        {(!user || user.role === 'creator') && user?.role !== 'admin' && (
                             <Link href="/dashboard" className="sidebar-link" onClick={() => setMobileMenu(false)}>
                                 <LayoutDashboard size={16} /> Creator Hub
                             </Link>
                         )}
-                        {(!user || user.role === 'advertiser') && (
+                        {(!user || user.role === 'advertiser') && user?.role !== 'admin' && (
                             <Link href="/advertiser" className="sidebar-link" onClick={() => setMobileMenu(false)}>
                                 Advertiser
+                            </Link>
+                        )}
+                        {user?.role === 'admin' && (
+                            <Link href="/admin" className="sidebar-link text-amber-400" onClick={() => setMobileMenu(false)}>
+                                <LayoutDashboard size={16} /> Admin Dashboard
                             </Link>
                         )}
                         <hr className="border-[rgba(139,92,246,0.1)] my-2" />

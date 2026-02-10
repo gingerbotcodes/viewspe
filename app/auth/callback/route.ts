@@ -22,11 +22,14 @@ export async function GET(request: Request) {
                     .single();
 
                 if (profile) {
-                    // Update role to what user selected at login
-                    await supabase
-                        .from('profiles')
-                        .update({ role })
-                        .eq('id', user.id);
+                    // Update role to what user selected at login, UNLESS user is already an admin
+                    // Admins should never be downgraded by logging in via the normal flow
+                    if (profile.role !== 'admin') {
+                        await supabase
+                            .from('profiles')
+                            .update({ role })
+                            .eq('id', user.id);
+                    }
                 }
 
                 // Check if creator profile exists

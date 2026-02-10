@@ -30,7 +30,8 @@ const navItems = {
     ],
     admin: [
         { href: '/admin', label: 'Overview', icon: LayoutDashboard },
-        { href: '/admin/approvals', label: 'Approval Queue', icon: CheckCircle2 },
+        { href: '/admin/vetting', label: 'Vetting', icon: Shield },
+        { href: '/admin/approvals', label: 'Submissions', icon: CheckCircle2 },
         { href: '/admin/campaigns', label: 'Campaigns', icon: Megaphone },
     ],
     advertiser: [
