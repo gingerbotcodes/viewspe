@@ -37,15 +37,24 @@ export default function SettingsPage() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
+        const googleName = user.user_metadata?.full_name || user.user_metadata?.name || '';
+        const googleEmail = user.email || '';
+        const googleAvatar = user.user_metadata?.avatar_url || null;
+
         const { data: creator } = await supabase
             .from('creators')
             .select('name, phone, email, avatar_url, instagram_handle, youtube_handle')
             .eq('user_id', user.id)
             .single();
 
-        if (creator) {
-            setProfile(creator);
-        }
+        setProfile({
+            name: creator?.name || googleName,
+            phone: creator?.phone || '',
+            email: creator?.email || googleEmail,
+            avatar_url: creator?.avatar_url || googleAvatar,
+            instagram_handle: creator?.instagram_handle || null,
+            youtube_handle: creator?.youtube_handle || null,
+        });
         setLoading(false);
     };
 

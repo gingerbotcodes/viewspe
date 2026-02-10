@@ -1,15 +1,20 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Menu, X, Wallet, LogOut, User } from 'lucide-react';
+import {
+    Menu, X, Wallet, LogOut, User,
+    LayoutDashboard, Send, Settings
+} from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 export default function Navbar() {
     const [mobileMenu, setMobileMenu] = useState(false);
+    const [accountMenu, setAccountMenu] = useState(false);
     const [user, setUser] = useState<{ email?: string; name?: string; avatarUrl?: string } | null>(null);
+    const accountRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
 
     useEffect(() => {
@@ -25,12 +30,31 @@ export default function Navbar() {
         });
     }, []);
 
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (accountRef.current && !accountRef.current.contains(e.target as Node)) {
+                setAccountMenu(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     const handleLogout = async () => {
         const supabase = createClient();
         await supabase.auth.signOut();
         setUser(null);
+        setAccountMenu(false);
         router.push('/');
     };
+
+    const accountLinks = [
+        { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { href: '/dashboard/submissions', label: 'My Submissions', icon: Send },
+        { href: '/dashboard/wallet', label: 'Wallet', icon: Wallet },
+        { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+    ];
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[rgba(139,92,246,0.12)]"
@@ -62,29 +86,58 @@ export default function Navbar() {
                     {/* Right side */}
                     <div className="hidden md:flex items-center gap-3">
                         {user ? (
-                            <>
-                                <Link href="/dashboard/wallet"
-                                    className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm no-underline"
-                                    style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-                                    <Wallet size={14} className="text-[var(--vp-green)]" />
-                                    <span className="text-[var(--vp-green)] font-semibold">Wallet</span>
-                                </Link>
-                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm"
-                                    style={{ background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
+                            <div className="relative" ref={accountRef}>
+                                <button
+                                    onClick={() => setAccountMenu(!accountMenu)}
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm transition-all hover:ring-2 hover:ring-[var(--vp-purple)] hover:ring-opacity-50"
+                                    style={{ background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.2)' }}
+                                >
                                     {user.avatarUrl ? (
-                                        <Image src={user.avatarUrl} alt="" width={20} height={20} className="rounded-full" />
+                                        <Image src={user.avatarUrl} alt="" width={24} height={24} className="rounded-full" />
                                     ) : (
-                                        <User size={14} className="text-[var(--vp-purple-light)]" />
+                                        <User size={16} className="text-[var(--vp-purple-light)]" />
                                     )}
                                     <span className="text-[var(--vp-purple-light)] font-medium max-w-[120px] truncate">
                                         {user.name}
                                     </span>
-                                </div>
-                                <button onClick={handleLogout}
-                                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm text-[var(--vp-text-secondary)] hover:text-white transition border border-[var(--glass-border)] hover:border-[var(--vp-border-hover)]">
-                                    <LogOut size={14} />
                                 </button>
-                            </>
+
+                                {/* Dropdown */}
+                                {accountMenu && (
+                                    <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-[var(--glass-border)] overflow-hidden animate-fade-in"
+                                        style={{ background: 'rgba(18, 18, 24, 0.98)', backdropFilter: 'blur(20px)', boxShadow: '0 16px 48px rgba(0,0,0,0.4)' }}>
+                                        {/* User info */}
+                                        <div className="px-4 py-3 border-b border-[var(--glass-border)]">
+                                            <p className="text-sm font-medium truncate">{user.name}</p>
+                                            <p className="text-xs text-[var(--vp-text-muted)] truncate">{user.email}</p>
+                                        </div>
+                                        {/* Links */}
+                                        <div className="py-1">
+                                            {accountLinks.map((item) => (
+                                                <Link
+                                                    key={item.href}
+                                                    href={item.href}
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--vp-text-secondary)] hover:text-white hover:bg-[rgba(139,92,246,0.1)] transition no-underline"
+                                                    onClick={() => setAccountMenu(false)}
+                                                >
+                                                    <item.icon size={16} />
+                                                    {item.label}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                        {/* Logout */}
+                                        <div className="border-t border-[var(--glass-border)] py-1">
+                                            <button
+                                                onClick={handleLogout}
+                                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition w-full"
+                                            >
+                                                <LogOut size={16} />
+                                                Log out
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         ) : (
                             <Link href="/auth/login" className="btn-primary text-sm no-underline">
                                 Login
@@ -103,37 +156,44 @@ export default function Navbar() {
             {mobileMenu && (
                 <div className="md:hidden border-t border-[rgba(139,92,246,0.12)] animate-fade-in"
                     style={{ background: 'rgba(10, 10, 15, 0.95)' }}>
-                    <div className="p-4 flex flex-col gap-3">
+                    <div className="p-4 flex flex-col gap-1">
                         <Link href="/dashboard" className="sidebar-link" onClick={() => setMobileMenu(false)}>
-                            Creator Hub
+                            <LayoutDashboard size={16} /> Creator Hub
                         </Link>
                         <Link href="/advertiser" className="sidebar-link" onClick={() => setMobileMenu(false)}>
                             Advertiser
                         </Link>
-                        <hr className="border-[rgba(139,92,246,0.1)]" />
+                        <hr className="border-[rgba(139,92,246,0.1)] my-2" />
                         {user ? (
-                            <div className="flex flex-col gap-3 px-2">
-                                <div className="flex items-center gap-2 text-sm">
+                            <>
+                                <div className="flex items-center gap-2 px-4 py-2 text-sm">
                                     {user.avatarUrl ? (
-                                        <Image src={user.avatarUrl} alt="" width={24} height={24} className="rounded-full" />
+                                        <Image src={user.avatarUrl} alt="" width={28} height={28} className="rounded-full" />
                                     ) : (
-                                        <User size={16} className="text-[var(--vp-purple-light)]" />
+                                        <User size={18} className="text-[var(--vp-purple-light)]" />
                                     )}
-                                    <span className="text-white font-medium">{user.name}</span>
+                                    <div>
+                                        <p className="text-white font-medium text-sm">{user.name}</p>
+                                        <p className="text-[var(--vp-text-muted)] text-xs">{user.email}</p>
+                                    </div>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                    <Link href="/dashboard/wallet"
-                                        className="flex items-center gap-2 text-sm no-underline"
-                                        onClick={() => setMobileMenu(false)}>
-                                        <Wallet size={14} className="text-[var(--vp-green)]" />
-                                        <span className="text-[var(--vp-green)] font-semibold">Wallet</span>
+                                {accountLinks.map((item) => (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        className="sidebar-link"
+                                        onClick={() => setMobileMenu(false)}
+                                    >
+                                        <item.icon size={16} />
+                                        {item.label}
                                     </Link>
-                                    <button onClick={handleLogout} className="btn-ghost text-sm flex items-center gap-2">
-                                        <LogOut size={14} />
-                                        Logout
-                                    </button>
-                                </div>
-                            </div>
+                                ))}
+                                <hr className="border-[rgba(139,92,246,0.1)] my-2" />
+                                <button onClick={handleLogout} className="sidebar-link text-red-400 hover:text-red-300">
+                                    <LogOut size={16} />
+                                    Log out
+                                </button>
+                            </>
                         ) : (
                             <Link href="/auth/login" className="btn-primary text-sm no-underline w-full text-center"
                                 onClick={() => setMobileMenu(false)}>
