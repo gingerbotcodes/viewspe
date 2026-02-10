@@ -41,10 +41,16 @@ export default function VettingPage() {
 
     const handleApprove = async (id: string) => {
         const supabase = createClient();
-        await supabase
+        const { error } = await supabase
             .from('creators')
             .update({ vetting_status: 'approved' })
             .eq('id', id);
+
+        if (error) {
+            console.error('Error approving creator:', error);
+            alert(`Error approving creator: ${error.message}`);
+            return;
+        }
 
         setCreators(prev => prev.filter(c => c.id !== id));
     };
@@ -53,10 +59,16 @@ export default function VettingPage() {
         if (!confirm('Are you sure you want to reject this creator?')) return;
 
         const supabase = createClient();
-        await supabase
+        const { error } = await supabase
             .from('creators')
             .update({ vetting_status: 'rejected' })
             .eq('id', id);
+
+        if (error) {
+            console.error('Error rejecting creator:', error);
+            alert(`Error rejecting creator: ${error.message}`);
+            return;
+        }
 
         setCreators(prev => prev.filter(c => c.id !== id));
     };
