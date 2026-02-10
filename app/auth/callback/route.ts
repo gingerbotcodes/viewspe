@@ -5,15 +5,31 @@ export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url);
     const code = searchParams.get('code');
     const next = searchParams.get('next') ?? '/dashboard';
+    const role = searchParams.get('role') ?? 'creator';
 
     if (code) {
         const supabase = await createClient();
         const { error } = await supabase.auth.exchangeCodeForSession(code);
 
         if (!error) {
-            // Check if the user has a creator profile, create one if not
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
+                // Check if profile exists, update role if it does
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('id, role')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profile) {
+                    // Update role to what user selected at login
+                    await supabase
+                        .from('profiles')
+                        .update({ role })
+                        .eq('id', user.id);
+                }
+
+                // Check if creator profile exists
                 const { data: creator } = await supabase
                     .from('creators')
                     .select('id')

@@ -51,7 +51,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen">
-      <Navbar />
+      <Navbar minimal />
 
       {/* ============ HERO ============ */}
       <section className="hero-gradient relative pt-32 pb-20 px-4 overflow-hidden">

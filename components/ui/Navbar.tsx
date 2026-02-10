@@ -10,21 +10,29 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
-export default function Navbar() {
+export default function Navbar({ minimal = false }: { minimal?: boolean }) {
     const [mobileMenu, setMobileMenu] = useState(false);
     const [accountMenu, setAccountMenu] = useState(false);
-    const [user, setUser] = useState<{ email?: string; name?: string; avatarUrl?: string } | null>(null);
+    const [user, setUser] = useState<{ email?: string; name?: string; avatarUrl?: string; role?: string } | null>(null);
     const accountRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
 
     useEffect(() => {
         const supabase = createClient();
-        supabase.auth.getUser().then(({ data: { user } }) => {
+        supabase.auth.getUser().then(async ({ data: { user } }) => {
             if (user) {
+                // Get role from profiles table
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+
                 setUser({
                     email: user.email,
                     name: user.user_metadata?.full_name || user.user_metadata?.name || user.email,
                     avatarUrl: user.user_metadata?.avatar_url || null,
+                    role: profile?.role || 'creator',
                 });
             }
         });
@@ -73,19 +81,29 @@ export default function Navbar() {
                         <span className="text-xl font-bold gradient-text">ViewsPeCash</span>
                     </Link>
 
-                    {/* Desktop Nav */}
-                    <div className="hidden md:flex items-center gap-6">
-                        <Link href="/dashboard" className="text-sm text-[var(--vp-text-secondary)] hover:text-white transition no-underline">
-                            Creator Hub
-                        </Link>
-                        <Link href="/advertiser" className="text-sm text-[var(--vp-text-secondary)] hover:text-white transition no-underline">
-                            Advertiser
-                        </Link>
-                    </div>
+                    {/* Desktop Nav — only show relevant link based on role */}
+                    {!minimal && (
+                        <div className="hidden md:flex items-center gap-6">
+                            {(!user || user.role === 'creator') && (
+                                <Link href="/dashboard" className="text-sm text-[var(--vp-text-secondary)] hover:text-white transition no-underline">
+                                    Creator Hub
+                                </Link>
+                            )}
+                            {(!user || user.role === 'advertiser') && (
+                                <Link href="/advertiser" className="text-sm text-[var(--vp-text-secondary)] hover:text-white transition no-underline">
+                                    Advertiser
+                                </Link>
+                            )}
+                        </div>
+                    )}
 
                     {/* Right side */}
                     <div className="hidden md:flex items-center gap-3">
-                        {user ? (
+                        {minimal ? (
+                            <Link href="/auth/login" className="btn-primary text-sm no-underline">
+                                Login
+                            </Link>
+                        ) : user ? (
                             <div className="relative" ref={accountRef}>
                                 <button
                                     onClick={() => setAccountMenu(!accountMenu)}
@@ -146,9 +164,15 @@ export default function Navbar() {
                     </div>
 
                     {/* Mobile hamburger */}
-                    <button className="md:hidden text-white p-2" onClick={() => setMobileMenu(!mobileMenu)}>
-                        {mobileMenu ? <X size={24} /> : <Menu size={24} />}
-                    </button>
+                    {minimal ? (
+                        <Link href="/auth/login" className="md:hidden btn-primary text-sm no-underline">
+                            Login
+                        </Link>
+                    ) : (
+                        <button className="md:hidden text-white p-2" onClick={() => setMobileMenu(!mobileMenu)}>
+                            {mobileMenu ? <X size={24} /> : <Menu size={24} />}
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -157,12 +181,16 @@ export default function Navbar() {
                 <div className="md:hidden border-t border-[rgba(139,92,246,0.12)] animate-fade-in"
                     style={{ background: 'rgba(10, 10, 15, 0.95)' }}>
                     <div className="p-4 flex flex-col gap-1">
-                        <Link href="/dashboard" className="sidebar-link" onClick={() => setMobileMenu(false)}>
-                            <LayoutDashboard size={16} /> Creator Hub
-                        </Link>
-                        <Link href="/advertiser" className="sidebar-link" onClick={() => setMobileMenu(false)}>
-                            Advertiser
-                        </Link>
+                        {(!user || user.role === 'creator') && (
+                            <Link href="/dashboard" className="sidebar-link" onClick={() => setMobileMenu(false)}>
+                                <LayoutDashboard size={16} /> Creator Hub
+                            </Link>
+                        )}
+                        {(!user || user.role === 'advertiser') && (
+                            <Link href="/advertiser" className="sidebar-link" onClick={() => setMobileMenu(false)}>
+                                Advertiser
+                            </Link>
+                        )}
                         <hr className="border-[rgba(139,92,246,0.1)] my-2" />
                         {user ? (
                             <>
