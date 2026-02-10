@@ -15,12 +15,9 @@ export default function VettingCheck({ status }: { status: string }) {
         }
     }, [status, pathname, router]);
 
-    if (status === 'pending' && !pathname.includes('/dashboard/onboarding')) {
-        return (
-            <div className="bg-yellow-500/10 border-b border-yellow-500/20 px-4 py-2 text-center text-sm text-yellow-200">
-                Your profile is currently under review. Some features may be restricted.
-            </div>
-        );
+    if (status === 'pending' && !pathname.includes('/dashboard/onboarding') && !pathname.includes('/dashboard/settings')) {
+        router.push('/dashboard/onboarding');
+        return null;
     }
 
     if (status === 'rejected' && !pathname.includes('/dashboard/onboarding')) {

@@ -170,9 +170,11 @@ export default function Navbar({ minimal = false }: { minimal?: boolean }) {
 
                     {/* Mobile hamburger */}
                     {minimal && !user ? (
-                        <Link href="/auth/login" className="md:hidden btn-primary text-sm no-underline">
-                            Login
-                        </Link>
+                        <div className="md:hidden">
+                            <Link href="/auth/login" className="btn-primary text-sm no-underline">
+                                Login
+                            </Link>
+                        </div>
                     ) : (
                         <button className="md:hidden text-white p-2" onClick={() => setMobileMenu(!mobileMenu)}>
                             {mobileMenu ? <X size={24} /> : <Menu size={24} />}
