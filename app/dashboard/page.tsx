@@ -3,17 +3,24 @@ import { IndianRupee, Eye, Send, TrendingUp } from 'lucide-react';
 import StatsCard from '@/components/ui/StatsCard';
 import CampaignCard from '@/components/ui/CampaignCard';
 import { getCampaigns, getCreatorStats } from '@/lib/supabase/queries';
+import { createClient } from '@/lib/supabase/server';
 
 export default async function CreatorDashboard() {
     const campaigns = await getCampaigns();
     const stats = await getCreatorStats('cr_1');
+
+    // Get user's first name from Google account
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const fullName = user?.user_metadata?.full_name || user?.user_metadata?.name || 'Creator';
+    const firstName = fullName.split(' ')[0];
 
     return (
         <div className="max-w-6xl mx-auto space-y-8">
             {/* Header */}
             <div>
                 <h1 className="text-2xl sm:text-3xl font-bold">
-                    Welcome back, <span className="gradient-text">Rahul</span> 👋
+                    Welcome back, <span className="gradient-text">{firstName}</span> 👋
                 </h1>
                 <p className="text-[var(--vp-text-secondary)] mt-1 text-sm">
                     Here&apos;s your creator dashboard overview

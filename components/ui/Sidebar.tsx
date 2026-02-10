@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -48,61 +48,39 @@ const roleLabels = {
 
 export default function Sidebar({ role }: SidebarProps) {
     const pathname = usePathname();
-    const [open, setOpen] = useState(false);
     const items = navItems[role];
     const roleInfo = roleLabels[role];
 
     return (
-        <>
-            {/* Mobile toggle button */}
-            <button
-                className="md:hidden fixed top-20 left-4 z-50 p-2 rounded-lg"
-                style={{ background: 'var(--vp-bg-card)', border: '1px solid var(--glass-border)' }}
-                onClick={() => setOpen(!open)}
-            >
-                {open ? <X size={20} /> : <Menu size={20} />}
-            </button>
-
-            {/* Overlay for mobile */}
-            {open && (
-                <div
-                    className="md:hidden fixed inset-0 z-30 bg-black/50"
-                    onClick={() => setOpen(false)}
-                />
-            )}
-
-            {/* Sidebar */}
-            <aside className={`sidebar fixed md:sticky top-0 z-40 pt-20 ${open ? 'open' : ''}`}
-                style={{ height: '100vh' }}>
-                {/* Role label */}
-                <div className="px-6 py-4 mb-2">
-                    <div className="flex items-center gap-2">
-                        <roleInfo.icon size={16} style={{ color: roleInfo.color }} />
-                        <span className="text-xs font-semibold uppercase tracking-wider"
-                            style={{ color: roleInfo.color }}>
-                            {roleInfo.label}
-                        </span>
-                    </div>
+        <aside className="sidebar hidden md:block fixed md:sticky top-0 z-40 pt-20"
+            style={{ height: '100vh' }}>
+            {/* Role label */}
+            <div className="px-6 py-4 mb-2">
+                <div className="flex items-center gap-2">
+                    <roleInfo.icon size={16} style={{ color: roleInfo.color }} />
+                    <span className="text-xs font-semibold uppercase tracking-wider"
+                        style={{ color: roleInfo.color }}>
+                        {roleInfo.label}
+                    </span>
                 </div>
+            </div>
 
-                {/* Nav items */}
-                <nav className="flex flex-col gap-1 px-2">
-                    {items.map((item) => {
-                        const isActive = pathname === item.href;
-                        return (
-                            <Link
-                                key={item.href + item.label}
-                                href={item.href}
-                                className={`sidebar-link ${isActive ? 'active' : ''}`}
-                                onClick={() => setOpen(false)}
-                            >
-                                <item.icon size={18} />
-                                <span>{item.label}</span>
-                            </Link>
-                        );
-                    })}
-                </nav>
-            </aside>
-        </>
+            {/* Nav items */}
+            <nav className="flex flex-col gap-1 px-2">
+                {items.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                        <Link
+                            key={item.href + item.label}
+                            href={item.href}
+                            className={`sidebar-link ${isActive ? 'active' : ''}`}
+                        >
+                            <item.icon size={18} />
+                            <span>{item.label}</span>
+                        </Link>
+                    );
+                })}
+            </nav>
+        </aside>
     );
 }
